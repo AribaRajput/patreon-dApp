@@ -1,0 +1,59 @@
+pragma solidity ^0.4.17;
+contract PatreonFactory {
+    
+    address[] public deployedPatreons;
+   
+    
+    function createPatreon(string title, string description) public {
+        address newPatreon = new Patreon(title, description, msg.sender);
+      
+        deployedPatreons.push(newPatreon);
+    }
+    
+    function getDeployedPatreon() public view returns (address[]) {
+        return deployedPatreons;
+    }
+    
+}
+contract Patreon {
+    
+    
+    address public manager;
+    uint public contributors;
+    string patreonTitle;
+    string patreonDescription;
+ 
+    
+    function Patreon(string title, string description, address creator) public {
+        manager = creator;
+        patreonTitle = title;
+        patreonDescription = description;
+    }
+    
+    function pay() public payable {
+        require(msg.value > .01 ether);
+        contributors += 1;
+    }
+    
+    function cashOut() public {
+        require(msg.sender == manager);
+        manager.transfer(this.balance);
+    }
+    
+   function destroy() public {
+        require(msg.sender == manager);
+        selfdestruct(manager);
+    }
+    
+        function getInfo() public view returns (
+        string, string, uint, address
+    ) {
+        return (
+            patreonTitle,
+            patreonDescription,
+            contributors,
+            manager
+  
+        );
+    }
+}
